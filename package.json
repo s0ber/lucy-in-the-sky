@@ -1,0 +1,19 @@
+{
+  "name": "lucy-in-the-sky",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s0ber/lucy-in-the-sky.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/s0ber/lucy-in-the-sky/issues"
+  },
+  "homepage": "https://github.com/s0ber/lucy-in-the-sky#readme"
+}
