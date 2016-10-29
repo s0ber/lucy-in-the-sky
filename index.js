@@ -14,13 +14,15 @@ const normalizeVector = ({x, y}) => {
   return {x: x / arcLength, y: y / arcLength}
 }
 
-// const move = () => {
-//   letters.forEach((letter) => {
-//     const {x, y} = normalizeVector(getDirection())
-//     letter.style.transform = `translate(${x}px, ${y}px)`
-//   })
-//   requestAnimationFrame(move)
-// }
+const move = () => {
+  letters.forEach((letter) => {
+    const {x, y} = normalizeVector(getDirection())
+    letter.style.transform = `translate(${x}px, ${y}px)`
+  })
+  requestAnimationFrame(move)
+}
+
+move()
 
 const lerp = (startPoint, endPoint, period) => {
   return {
@@ -32,7 +34,7 @@ const lerp = (startPoint, endPoint, period) => {
 let letterState = []
 let deltaTime = 0
 let lastTimeStamp = performance.now()
-const animate = () = {
+const animate = () => {
   const timeStamp = performance.now()
   deltaTime = timeStamp - lastTimeStamp
   lastTimeStamp = timeStamp
@@ -41,4 +43,4 @@ const animate = () = {
 
   requestAnimationFrame(animate)
 }
-animate()
+// animate()
