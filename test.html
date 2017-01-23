@@ -8,6 +8,23 @@
       .letter {
         display: inline-block;
         white-space: pre;
+        position: relative;
+      }
+
+      .base {
+        position: relative;
+        z-index: 1;
+      }
+      .glitch {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+      .glitch:nth-child(even) {
+        color: #0f0;
+      }
+      .glitch:nth-child(odd) {
+        color: #f0f;
       }
     </style>
   </head>
