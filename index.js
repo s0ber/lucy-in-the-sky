@@ -1,12 +1,46 @@
-const text = document.getElementById('lucy')
-const createSpan = letter => `<span class="letter"><span class="base">${letter}</span><span class="glitch">${letter}</span><span class="glitch">${letter}</span></span>`
-text.innerHTML = text.textContent.trim().split('').map(createSpan).join('')
+const createSpan = (letter) => {
+  if (letter === ' ' || letter === '\n') {
+    return letter
+  } else {
+    return '<span class="letter" style="display: inline-block; position: relative;">' +
+      `<span style="position: absolute; left: 0; top: 0; color: #0f0;">${letter}</span>` +
+      `<span style="position: absolute; left: 0; top: 0; color: #f0f;">${letter}</span>` +
+      `<span style="position: relative;">${letter}</span>` +
+    '</span>'
+  }
+}
+
+const wrapIntoSpan = (node) => {
+  let span = document.createElement('span')
+  node.parentNode.insertBefore(span, node)
+  span.appendChild(node)
+  return span
+}
+
+const createLetters = (span) => {
+  span.innerHTML = span.textContent.trim().split('').map(createSpan).join('')
+}
+
+const letterize = (node) => {
+  node.childNodes.forEach((node) => {
+    if (node.nodeType === 3) {
+      let span = wrapIntoSpan(node)
+      createLetters(span)
+    } else {
+      letterize(node)
+    }
+  })
+}
+
+letterize(document.body)
+
 const letters = document.querySelectorAll('.letter')
 
-const JITTER_TIME = 600
-const X_PERIOD = 10000
-const Y_PERIOD = 6000
-const GLITCH_OFFSET = 1.5 //px
+const JITTER_TIME = 1000
+const X_PERIOD = 20000
+const Y_PERIOD = 12000
+const GLITCH_OFFSET = 1 //px
+const LETTER_MOVEMENT_RADIUS = 1.5
 
 const TAU = 2 * Math.PI
 
@@ -25,6 +59,18 @@ let isWindowActive = true
 window.onfocus = () => { isWindowActive = true }
 window.onblur = () => { isWindowActive = false }
 
+const markLettersInsideViewport = () => {
+  let rect
+  for (i = 0; i < letters.length; i++) {
+    rect = letters[i].getBoundingClientRect()
+    letters[i]._isInsideViewport = rect.top >= 0 && rect.bottom <= window.innerHeight
+  }
+}
+
+markLettersInsideViewport()
+window.onscroll = markLettersInsideViewport
+window.onresize = markLettersInsideViewport
+
 const bringJoy = (letters, movements = []) => {
   let nextMovements = []
 
@@ -32,7 +78,7 @@ const bringJoy = (letters, movements = []) => {
   if (isWindowActive) {
     if (movements.length === 0) {
       const letterArray = Array.from(letters)
-      nextMovements = letterArray.map(moveLetter).concat(letterArray.map(moveGlitches))
+      nextMovements = letterArray.map(moveLetter)
     } else {
       nextMovements = movements.map(movement => movement())
     }
@@ -46,6 +92,7 @@ const bringJoy = (letters, movements = []) => {
 const moveLetter = (letter, {startPoint, endPoint, startTime, endTime} = {}) => {
   const curTime = performance.now()
 
+  if (letter._isInsideViewport) {
   // prev movement is over
   if (endTime && curTime >= endTime) {
     // start from previous "frame", so letter will not stop for a moment
@@ -62,6 +109,7 @@ const moveLetter = (letter, {startPoint, endPoint, startTime, endTime} = {}) => 
   // new movement started, schedule new direction
   if (!endPoint) {
     endPoint = normalizeVector(getDirection())
+    endPoint = {x: endPoint.x * LETTER_MOVEMENT_RADIUS, y: endPoint.y * LETTER_MOVEMENT_RADIUS}
     endTime = startTime + JITTER_TIME
   }
 
@@ -71,22 +119,28 @@ const moveLetter = (letter, {startPoint, endPoint, startTime, endTime} = {}) => 
   const y = startPoint.y + (endPoint.y - startPoint.y) * movementPos
 
   letter.style.transform = `translate(${x}px, ${y}px)`
+  moveGlitches(letter)
+  }
 
   return () => {
     return moveLetter(letter, {startPoint, startTime, endPoint, endTime})
   }
 }
 
-const moveGlitches = (letter, {startTime} = {}) => {
+let glitchesStartTime
+
+const moveGlitches = (letter) => {
   const curTime = performance.now()
-  const glitches = letter.querySelectorAll('.glitch')
 
   // initialize the movement
-  if (!startTime) {
-    return moveGlitches(letter, {startTime: curTime})
+  if (!glitchesStartTime) {
+    glitchesStartTime = curTime
   }
 
-  const timeDelta = curTime - startTime
+  if (letter._isInsideViewport) {
+    const glitches = [letter.children[0], letter.children[1]]
+
+  const timeDelta = curTime - glitchesStartTime
   const xPos = timeDelta / X_PERIOD
   const yPos = timeDelta / Y_PERIOD
 
@@ -98,8 +152,7 @@ const moveGlitches = (letter, {startTime} = {}) => {
 
     glitch.style.transform = `translate(${x}px, ${y}px)`
   }
-
-  return () => moveGlitches(letter, {startTime})
+  }
 }
 
 bringJoy(letters)
