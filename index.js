@@ -36,11 +36,11 @@ letterize(document.body)
 
 const letters = document.querySelectorAll('.letter')
 
-const JITTER_TIME = 1000
+const JITTER_TIME = 1200
 const X_PERIOD = 20000
 const Y_PERIOD = 12000
 const GLITCH_OFFSET = 1 //px
-const LETTER_MOVEMENT_RADIUS = 1.5
+const LETTER_MOVEMENT_RADIUS = 5
 
 const TAU = 2 * Math.PI
 
